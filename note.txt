@@ -1,0 +1,80 @@
+global frame_table {
+    Ref_count,    // 1.)usage of each of its physical frames
+    Locked,
+    inverse_mapping,    // 2.) where you maintain backward mappings to the addr space
+    linkage    // 3.) the vpage that maps a particular frame (a frame can only be mapped by at most one PTE at a time)
+    list_of_free_frames
+
+}   
+
+class process{
+    list vmas
+    page_table{ //from virtual pages to physical frame
+        PTE pagetable[64]
+        struct PTE {
+            unsigned int PRESENT/VALID:1;
+            unsigned int WRITE_PROTECT:1;
+            unsigned int MODIFIED:1;
+            unsigned int REFERENCED:1;
+            unsigned int PAGEDOUT:1;
+            unsigned int frame:7;
+            unsigned int rest:20;
+            string toString(){
+                // # not valid and is swapped out
+                // * not valid and has no swapped area
+            }
+        };
+    }
+}
+
+Cycle
+    maps and unmaps each cost 400 cycles, page-in/outs each cost 3000 cycles, file in/outs cost 2500 cycles, zeroing a page costs
+    150 cycles, a segv costs 240 cycles, a segprot costs 300 cycles and each access (read or write) costs 1 cycles and a context
+    switch costs 121 cycles
+Result
+    Single Process
+        printf("PROC[%d]: U=%lu M=%lu I=%lu O=%lu FI=%lu FO=%lu Z=%lu SV=%lu SP=%lu\n",
+        proc->pid,
+        pstats->unmaps, pstats->maps, pstats->ins, pstats->outs,
+        pstats->fins, pstats->fouts, pstats->zeros,
+        pstats->segv, pstats->segprot);
+    All
+        unsigned long long int;
+        unsigned long ctx_switches, inst_count;
+        printf("TOTALCOST %lu %lu %llu\n", ctx_switches, inst_count, cost);
+
+pghandler{
+    case 1: if the page is not present
+    Allocate New Memory
+    currentproc->pagetable[vpage].frame = allocated_frame {
+        The population depends whether this page was previously paged out (in which case the
+        page must be brought back from the swap space (“IN”) or (“FIN” in case it is a memory mapped file). If the vpage was never
+        swapped out and is not file mapped, then by definition it still has a zero filled content and you issue the “ZERO” output.
+    }
+    case 2: run out of free frames
+    call Page.select_frame() to get a victim frame and "UNMAP" the frame. 
+        !!Important!!  must remember the state of the bits
+    case 3: write_protection enabled
+        a SEGPROT output line is to be generated. The page is considered referenced but not modified in this case
+}
+
+
+
+
+
+
+Bit fields
+
+struct DISK_REGISTER  {
+     unsigned ready:1;
+     unsigned error_occured:1;
+     unsigned disk_spinning:1;
+     unsigned write_protect:1;
+     unsigned head_loaded:1;
+     unsigned error_code:8;
+     unsigned track:9;
+     unsigned sector:5;
+     unsigned command:5;
+};
+
+
