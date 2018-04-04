@@ -3,7 +3,6 @@ global frame_table {
     Locked,
     inverse_mapping,    // 2.) where you maintain backward mappings to the addr space
     linkage    // 3.) the vpage that maps a particular frame (a frame can only be mapped by at most one PTE at a time)
-    list_of_free_frames
 
 }   
 

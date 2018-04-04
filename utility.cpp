@@ -24,7 +24,6 @@ int myRand::open(std::string filename){
     string inputStr;
     int idx = 0;
     ofs = 0;
-
     try {
         inFile.open(filename);
         if(inFile.is_open()){
