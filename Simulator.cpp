@@ -138,8 +138,9 @@ void Simulator::run(){
                             cout<<" OUT"<<endl;
                         process_array[newframe->pid]->pstats.outs++;
                         cost+=3000;
+                        newframe->pte->PAGEDOUT = 1;
                     }
-                    newframe->pte->PAGEDOUT = 1;
+                    
                     newframe->pte->MODIFIED = 0;
                 }
             }
@@ -155,6 +156,7 @@ void Simulator::run(){
                     cout<<" IN"<<endl;
                 current_process->pstats.ins++;
                 cost+=3000;
+                
             }
             else{
                 if(display_options[0])
@@ -162,6 +164,7 @@ void Simulator::run(){
                 current_process->pstats.zeros++;
                 cost+=150;
             }
+            // pte->PAGEDOUT = 0;
             //mapping
             if(display_options[0])
                 cout<<" MAP "<<newframe->frame_id<<endl;

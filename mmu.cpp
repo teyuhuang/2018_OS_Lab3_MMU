@@ -84,7 +84,7 @@ int main(int argc, char **argv){
                     pager = new Pager_NRU;
                     break;
                 case 'c':
-                    pager = new Pager_FIFO;
+                    pager = new Pager_Clock;
                     break;
                 case 'a':
                     pager = new Pager_Aging;

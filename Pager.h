@@ -1,6 +1,7 @@
 #ifndef PAGER_H
 #define PAGER_H
 #include <queue>
+#include <list>
 #include "Essentials.h"
 #include "utility.h"
 class Pager {
@@ -31,7 +32,11 @@ public:
     // reset the ref bits every 10th page replacement request before
     // you implement the replacement operation
     Frame* determine_victim_frame();    //Select a frame to sacrifice
-    void initialize();  
+private:
+    list<Frame*> q_class[4];
+    int replacement_counter = 0;
+    void sort_frame_into_4_classes(bool reset_ref);
+    
 };
 class Pager_Clock: public Pager{
 public:
@@ -42,6 +47,8 @@ protected:
 class Pager_Aging: public Pager{
 public:
     Frame* determine_victim_frame();    //Select a frame to sacrifice 
-    void initialize(); 
+    void initialize(myRand* r); 
+protected:
+    unsigned int age_vector[MAX_FRAME]; 
 };
 #endif /* PAGER_H */

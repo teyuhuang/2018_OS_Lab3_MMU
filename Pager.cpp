@@ -1,6 +1,7 @@
 #include "Pager.h"
 #include "Essentials.h"
 #include <iostream>
+#include <list>
 
 using namespace std;
 /*
@@ -61,13 +62,51 @@ Frame* Pager_Random::determine_victim_frame(){
 Frame* Pager_NRU::determine_victim_frame(){
     //we shall reset the ref bits every 10th page replacement request before
     //you implement the replacement operation
-    
-    return new Frame(5);
-}
-void Pager_NRU::initialize(){
+    Frame* f = nullptr;
+    sort_frame_into_4_classes(++replacement_counter>=10);
+    if(replacement_counter>=10) replacement_counter = 0;
 
+    for(int i=0;i<4;i++){
+        if(q_class[i].size()>0){
+            int idx = pager_rand->myrandom(q_class[i].size());
+            list<Frame*>::iterator it = q_class[i].begin();
+            std::advance(it,idx);
+            f = *it;
+            break;
+        }
+    }
+    return f;
 }
-
+void Pager_NRU::sort_frame_into_4_classes(bool reset_ref){
+    for(int i=0;i<4;i++){
+        q_class[i].clear();
+    }
+    // start sorting
+    bool ref = false, mod = false;
+    Frame* frame;
+    for(int i=0;i<frame_table::num_of_frame;i++){
+        frame = frame_table::inverse_mapping[i];
+        ref = frame->pte->REFERENCED;
+        mod = frame->pte->MODIFIED;
+        if(!ref&&!mod){     //0 , 0 first class
+            q_class[0].push_back(frame);
+        }
+        else if(!ref&&mod){     //0 , 1 second class
+            q_class[1].push_back(frame);
+        }
+        else if(ref&&!mod){      //1, 0 3rd class
+            q_class[2].push_back(frame);
+        }
+        else{                   // 0, 0 4th
+            q_class[3].push_back(frame);
+        }
+        //reset REFERENCED bit
+        if(reset_ref){
+            ref = false;
+            frame->pte->REFERENCED = 0;
+        }
+    }
+}
 /*
 *   Pager_Clock
 */
@@ -77,10 +116,9 @@ Frame* Pager_Clock::determine_victim_frame(){
     while(!found){
         f= frame_table::inverse_mapping[page_idx++];
         if (page_idx>=frame_table::num_of_frame) page_idx = 0;
-        if(f->pte->REFERENCED)
-            f->pte->REFERENCED = 0;
-        else
+        if(!f->pte->REFERENCED)
             found = true;
+        f->pte->REFERENCED = 0;
     }
     return f;
 }
@@ -89,8 +127,25 @@ Frame* Pager_Clock::determine_victim_frame(){
 *   Pager_Aging
 */
 Frame* Pager_Aging::determine_victim_frame(){
-    return new Frame(5);
+    Frame* f;
+    unsigned int smallest = 0xffffffff;
+    for(int i=0;i<frame_table::num_of_frame;i++){
+        age_vector[i]>>=1;
+        age_vector[i]&=0x7fffffff;
+        if(frame_table::inverse_mapping[i]->pte->REFERENCED){
+            age_vector[i]|=0x80000000;
+            frame_table::inverse_mapping[i]->pte->REFERENCED = 0;
+        }
+        if(age_vector[i]<smallest){
+            f=frame_table::inverse_mapping[i];
+            smallest = age_vector[i];
+        }
+    }
+    return f;
 }   
-void Pager_Aging::initialize(){
-
+void Pager_Aging::initialize(myRand* r){
+    pager_rand = r;
+    for(int i=0;i<frame_table::num_of_frame;i++){
+        age_vector[i]=0;
+    }
 }

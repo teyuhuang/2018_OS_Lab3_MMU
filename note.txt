@@ -76,4 +76,6 @@ struct DISK_REGISTER  {
      unsigned command:5;
 };
 
-
+cd /Users/edisonhuang/Projects/Operating\ System/OS\_Lab3\_MMU/lab3\_assign/scripts/  
+./runit.sh ../inputs ../tmp_out ../../mmu 
+./gradeit.sh ../refout ../tmp_out
