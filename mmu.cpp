@@ -13,7 +13,7 @@ int main(int argc, char **argv){
     
     bool OPFSxyfa[8];
     for(int i = 0;i<8;i++) OPFSxyfa[i] = false;
-    int num_of_frame = 128;
+    int num_of_frame = 4;
     Pager* pager = nullptr;
     int n_arg = 0;
     int c;
@@ -100,9 +100,7 @@ int main(int argc, char **argv){
             num_of_frame = Util::s2i(optarg);
             break;
         case '?':
-            fprintf(stderr,
-                    "Unknown option character `\\s%s'.\n",
-                    optopt);
+            fprintf(stderr,"Unknown option character.\n");
             return 1;
         default:
             abort();
